@@ -1,7 +1,7 @@
 """Offline motion tracker for the demo footage.
 
 Runs OpenCV background subtraction + a greedy centroid tracker at ~10 fps and
-writes data/tracks.js (window.AYNA_TRACKS). The browser replays these points on
+writes data/tracks.js (window.SAFAR_TRACKS). The browser replays these points on
 top of the <video> element in sync with currentTime, so the "real-time data
 points" are derived from the real footage, not drawn at random.
 
@@ -81,7 +81,7 @@ def main():
         res[name] = track(p, cfg)
         print(name, "frames", len(res[name]["frames"]), "tracks", res[name]["unique"], file=sys.stderr)
     with open(os.path.join(ROOT, "data", "tracks.js"), "w") as f:
-        f.write("window.AYNA_TRACKS=" + json.dumps(res, separators=(",", ":")) + ";\n")
+        f.write("window.SAFAR_TRACKS=" + json.dumps(res, separators=(",", ":")) + ";\n")
 
 
 if __name__ == "__main__":

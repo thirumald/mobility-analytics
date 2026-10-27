@@ -2,7 +2,7 @@
    A static page cannot make the log truly immutable – production needs server-side WORM storage;
    this demonstrates the record format and tamper detection. */
 (function () {
-  const KEY = 'ayna_audit_v1';
+  const KEY = 'safar_audit_v1';
 
   function sha256(str) {
     const K = new Uint32Array(64), H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];

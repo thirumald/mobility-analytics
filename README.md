@@ -1,48 +1,74 @@
-# AYNA Transit Analytics — static MVP
+# SAFAR · Mobility intelligence for Abu Dhabi
 
-A working, fully static demo of the AYNA public-transport analytics platform
-(AI agent + five diagnostic tools + Stage 0 EDA/sizing + security controls),
-built on **synthetic data**. No backend, no build step.
+A static, build-free web app that fuses transit, fleet, event, safety, weather and population data into one operating
+picture for ground transport in **Abu Dhabi and the wider UAE**. It shares its design language with the parent
+**AeroFusion AI** app (same tokens, light/dark theme via the shared `af.theme` setting, grouped sidebar, KPI tiles).
+
+All network, demand, fleet, event, weather and incident data is **synthetic**. Hub coordinates are approximate and the
+routes (T1–T11, AL1, I1–I5) are fictional.
 
 ## Run
 
 ```bash
-python3 -m http.server 8000     # then open http://localhost:8000
+python3 -m http.server 8000      # open http://localhost:8000
 ```
 
-`index.html` also works when opened directly from disk (the SQL engine's WASM is embedded as base64).
-The online OpenStreetMap basemap needs internet; without it the app falls back automatically to the
-bundled Azerbaijan outline.
+Also works from `file://` (the SQL engine's WASM is embedded as base64). The included GitHub Pages workflow (`.github/workflows/static.yml`) publishes the repo root on every push to `main`.
+The live basemap (CARTO/OpenStreetMap) needs internet; offline, the app falls back to the bundled emirate outlines.
 
-## What is in it
+## Pages (sidebar)
 
-| Tab | Requirement IDs | What you get |
+| Group | Page | What it shows |
 | --- | --- | --- |
-| Map & Diagnostics | DT-01…DT-05, AG-03 | Azerbaijan map with 17 routes / 214 stops (Baku, Sumgait, Ganja, Nakhchivan and inter-city). Five tools driven by an hour slider: slow zones + stop-to-stop travel time, demand/capacity, demand clusters, overlap/backtracking/transfer hotspots, O/D matrix. Click any stop, route or segment → **Ask the agent**. A live simulation moves vehicles and fires validation events. |
-| AI Agent | AG-01, AG-02, SC-02, SC-04 | Azerbaijani/English questions → **real SQL** executed on an in-browser SQLite (sql.js) → summary from aggregated rows only (≤ 50). Role-based table permissions and small-cell masking (k = 10). |
-| Live data | — | Three **real video clips** with motion-tracked points replayed in sync with playback, per-clip counters, and a link to the matching network object (model value vs video-derived rate). Video and per-frame points are downloadable. |
-| Stage 0 · EDA | DD-01…DD-04 | The seven-section EDA report template filled from the synthetic data, plus an infrastructure sizing calculator and a Markdown technical-justification export. |
-| Audit & Security | SC-01…SC-04 | Simulated SSO user switch, RBAC matrix, hash-chained audit log of every question/answer with verify + tamper demo. |
-| Requirements | all | Traceability table (working / simulated / open) and the open items to clarify with AYNA. |
+| Situational | Overview | KPI strip, alerts this hour, key findings on a map of the UAE / Abu Dhabi emirate |
+| Transit diagnostics | Travel time, Utilization, Demand clusters, Route & transfers, Origin–Destination | Slow zones and stop-to-stop times; demand vs capacity; hot-stop clusters; overlap, backtracking, transfer hotspots; O/D matrix reconstructed from each card's next boarding |
+| Fleet & energy | Fleet & EV, Emissions | SOC and health, depot charging load, shifting charging to solar hours; CO₂ per route and an electrification what-if |
+| Operations | Event surge, Safety, What-if | F1 / concert / Ramadan / fireworks demand curves and shuttle gap; incident feed; add trips or larger vehicles and see load, cost and CO₂ |
+| Resilience & equity | Heat & dust, Access & equity | Rider heat exposure at stops without AC shelters (summer / winter / dust storm); 400 m coverage and low-income gaps by zone |
+| Intelligence | Copilot, Vision, Use cases | Arabic/English question → SQL → aggregated answer; seven camera feeds with synced tracked points and event logs; use-case hub with value/feasibility ranking and suggested next use cases |
+| Platform | Data & Sizing, Governance, Requirements | Seven-section data discovery and an infrastructure sizing calculator; simulated SSO, RBAC, PII masking, tamper-evident audit log; requirement traceability |
 
-## Honest limitations
+Click any stop, route, segment or vehicle on the map and press **Ask Copilot** to pass it to the chat as a parameter.
+The hour slider drives every layer; **Live simulation** moves vehicles and fires validation events.
 
-- **All network and demand data is synthetic** (`tools/gen_data.py`, seed fixed). Hub coordinates are approximate.
-- The agent uses a **rule-based parser, not an LLM**. It demonstrates the Text-to-SQL contract and guardrails; swap `interpret()` in `js/agent.js` for an LLM call. Azerbaijani accuracy criteria are an open item.
-- SSO, RBAC and the audit log are **simulated in the browser**. Real immutability needs server-side WORM storage.
-- O/D accuracy figures are measured against *synthetic* ground truth only.
-- The videos are generic open sample footage (a highway clip and a pedestrian clip), **not from Azerbaijan**. Check their licence terms before any public release and replace them with AYNA-owned footage.
-- Source requirements UI-01, AG-03, SC-02 are incomplete, so brand, map-parameter and role list are placeholders.
+## What is real and what is sample
 
-## Regenerate assets
+| Part | Status |
+| --- | --- |
+| Copilot SQL | **Real** read-only SQL on an in-browser SQLite (sql.js); role-based table permissions; small cells (<k) masked; every exchange audited. The question → SQL step is a **rule-based parser**, not an LLM (swap `interpret()` in `js/agent.js`) |
+| Audit log | Hash-chained (SHA-256) with tamper test, stored in the browser. Production needs server-side WORM storage |
+| Camera scenes (4) | **Simulated** top-down scenes rendered by `tools/make_scenes.py`; tracks and events come from the simulation, so they are exact |
+| Real clips (3) | Generic real footage (a highway clip and a pedestrian clip) with OpenCV motion tracks from `tools/track_videos.py`. **Not from the UAE.** Check licence terms before public release |
+| O/D accuracy | Measured against synthetic ground truth only |
+| Everything else | Synthetic (`tools/gen_data.py`, fixed seed) |
+
+## Regenerate
 
 ```bash
-python3 tools/gen_data.py                       # data/dataset.js + vendor/sql-wasm-b64.js
-pip install opencv-python-headless
-python3 tools/track_videos.py                   # data/tracks.js from videos/*.mp4
+python3 tools/gen_data.py                  # data/dataset.js + vendor/sql-wasm-b64.js
+pip install opencv-python-headless numpy
+python3 tools/make_scenes.py               # videos/scene-*.mp4 + data/tracks_syn.js (needs ffmpeg)
+python3 tools/track_videos.py              # data/tracks.js from the three real clips
+node tests/data.test.js                    # dataset and audit-hash checks
+```
+
+## Layout
+
+```
+index.html        shell (sidebar, top bar, views)        css/app.css     tokens + components (AeroFusion style)
+js/core.js        state, i18n (EN/AR), data access, SQL   js/map.js      map, tool registry, transit diagnostics
+js/tools2.js      fleet, emissions, events, safety, what-if, heat, equity
+js/agent.js       Copilot (EN/AR rule-based parser)       js/sim.js      live vehicle/validation simulation
+js/vision.js      camera feeds, synced overlays           js/docs.js     data & sizing, governance, requirements
+js/usecases.js    use-case hub                            js/audit.js    hash-chained audit log
+js/app.js         router, theme, language, user switch    data/ videos/ vendor/ tools/ tests/
 ```
 
 ## Third-party
 
-Leaflet 1.9.4 (BSD-2) and sql.js 1.10.3 (MIT) are vendored in `vendor/`. Azerbaijan outline from Natural Earth (public domain).
-Map tiles (optional) © OpenStreetMap contributors.
+Leaflet 1.9.4 (BSD-2) and sql.js 1.10.3 (MIT) are vendored in `vendor/`. Emirate outlines from Natural Earth (public domain).
+Optional basemap tiles © OpenStreetMap contributors © CARTO.
+
+## Related
+
+The same module also lives in [`aerofusion-ai/mobility`](https://github.com/thirumald/aerofusion-ai/tree/main/mobility), next to the AeroFusion airport-security app whose design it follows.
