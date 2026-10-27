@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AYNA Transit Analytics – MVP</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b7a75'/%3E%3Cpath d='M7 22l5-12 4 8 3-5 6 9' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0b7a75"/><path d="M7 22l5-12 4 8 3-5 6 9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>AYNA</b> <span data-i18n="brand_sub">Nəqliyyat Analitikası</span><small class="demo-pill">MVP · synthetic data</small></div>
+  </div>
+  <nav id="nav" aria-label="Main">
+    <button data-view="map" class="on" data-i18n="nav_map">Xəritə & Diaqnostika</button>
+    <button data-view="agent" data-i18n="nav_agent">AI Agent</button>
+    <button data-view="live" data-i18n="nav_live">Canlı məlumat</button>
+    <button data-view="eda" data-i18n="nav_eda">Mərhələ 0 · EDA</button>
+    <button data-view="audit" data-i18n="nav_audit">Audit & Təhlükəsizlik</button>
+    <button data-view="req" data-i18n="nav_req">Tələblər</button>
+  </nav>
+  <div class="ctl">
+    <select id="userSel" title="AYNA SSO (simulated)" aria-label="User"></select>
+    <div class="seg" role="group" aria-label="Language"><button data-lang="az" class="on">AZ</button><button data-lang="en">EN</button></div>
+  </div>
+</header>
+
+<main>
+  <!-- MAP + DIAGNOSTICS -->
+  <section id="v-map" class="view on">
+    <aside class="side">
+      <div class="tools" id="toolTabs"></div>
+      <div class="hourbar">
+        <label for="hour"><span data-i18n="hour">Saat</span>: <b id="hourLbl">08:00</b></label>
+        <input type="range" id="hour" min="0" max="23" value="8">
+      </div>
+      <div id="toolPanel" class="panel"></div>
+    </aside>
+    <div class="mapwrap">
+      <div id="map" aria-label="Map of Azerbaijan"></div>
+      <div class="maptools">
+        <button id="btnLive" class="pri">▶ <span data-i18n="live_sim">Canlı simulyasiya</span></button>
+        <button id="btnFit" data-i18n="fit_az">Azərbaycan</button>
+        <button id="btnFitBaku" data-i18n="fit_baku">Bakı</button>
+        <label class="chk"><input type="checkbox" id="chkTiles" checked> <span data-i18n="online_tiles">Onlayn xəritə</span></label>
+        <label class="chk"><input type="checkbox" id="chkStops" checked> <span data-i18n="show_stops">Dayanacaqlar</span></label>
+      </div>
+      <div class="selchip" id="selChip" hidden></div>
+      <div class="livebox" id="liveBox" hidden>
+        <div class="livehead"><b data-i18n="live_clock">Simulyasiya saatı</b> <span id="simClock">08:00:00</span>
+          <select id="simSpeed"><option value="1">×1</option><option value="30" selected>×30</option><option value="120">×120</option></select></div>
+        <div class="kpis"><div><b id="kVeh">0</b><small data-i18n="k_veh">hərəkətdə nəqliyyat</small></div><div><b id="kVal">0</b><small data-i18n="k_val">validasiya (sessiya)</small></div><div><b id="kSpd">0</b><small data-i18n="k_spd">orta sürət km/s</small></div></div>
+        <ul id="ticker"></ul>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <!-- AGENT -->
+  <section id="v-agent" class="view">
+    <div class="chat">
+      <div class="chathead">
+        <div><b data-i18n="agent_title">Şəbəkə üzrə AI agent</b>
+          <small data-i18n="agent_sub">Sual → SQL (Text-to-SQL) → yalnız aqreqasiya olunmuş nəticələr</small></div>
+        <span class="tag" id="parserTag">rule-based demo parser</span>
+      </div>
+      <div id="msgs" class="msgs" aria-live="polite"></div>
+      <div class="ctxrow"><span id="ctxChip" class="selchip inline" hidden></span></div>
+      <form id="chatForm" class="chatin" autocomplete="off">
+        <input id="chatInput" type="text" maxlength="300" data-i18n-ph="chat_ph" placeholder="Sualınızı yazın…">
+        <button class="pri" type="submit" data-i18n="send">Göndər</button>
+      </form>
+      <div class="examples" id="examples"></div>
+    </div>
+    <aside class="chatside">
+      <h3 data-i18n="guard_title">Qoruyucu qaydalar</h3>
+      <ul class="guard">
+        <li>AG-02 · <span data-i18n="g1">Modelə yalnız aqreqasiya olunmuş nəticə sətirləri (maks. 50) ötürülür.</span></li>
+        <li>SC-02 · <span data-i18n="g2">Rola uyğun cədvəl icazələri tətbiq olunur.</span></li>
+        <li>SC-03 · <span data-i18n="g3">Hər sual və cavab audit jurnalına yazılır.</span></li>
+        <li>SC-04 · <span data-i18n="g4">Kiçik hüceyrələr (&lt; k) maskalanır; kart identifikatorları heç vaxt göstərilmir.</span></li>
+      </ul>
+      <h3 data-i18n="schema_title">Analitik sxem</h3>
+      <div id="schemaBox" class="schema"></div>
+    </aside>
+  </section>
+
+  <!-- LIVE VIDEO -->
+  <section id="v-live" class="view scroll">
+    <div class="pagehead">
+      <h2 data-i18n="live_title">Real videolar üzərində canlı məlumat nöqtələri</h2>
+      <p data-i18n="live_note">Videolar real görüntülərdir (açıq nümunə footage, Azərbaycandan deyil). Hərəkət izləmə (OpenCV) oflayn aparılıb, nöqtələr videonun cari saniyəsinə sinxron çəkilir. Real layihədə bu axın AYNA kameraları / APC sensorlarından gələcək.</p>
+    </div>
+    <div id="videoGrid" class="vgrid"></div>
+  </section>
+
+  <!-- EDA -->
+  <section id="v-eda" class="view scroll"><div id="edaBody" class="doc"></div></section>
+
+  <!-- AUDIT -->
+  <section id="v-audit" class="view scroll"><div id="auditBody" class="doc"></div></section>
+
+  <!-- REQUIREMENTS -->
+  <section id="v-req" class="view scroll"><div id="reqBody" class="doc"></div></section>
+</main>
+
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/sql-wasm.js"></script>
+<script src="vendor/sql-wasm-b64.js"></script>
+<script src="data/dataset.js"></script>
+<script src="data/tracks.js"></script>
+<script src="data/azerbaijan.js"></script>
+<script src="js/core.js"></script>
+<script src="js/audit.js"></script>
+<script src="js/agent.js"></script>
+<script src="js/map.js"></script>
+<script src="js/live.js"></script>
+<script src="js/docs.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
