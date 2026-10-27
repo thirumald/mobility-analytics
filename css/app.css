@@ -1,5 +1,4 @@
-/* SAFAR – Mobility intelligence. Visual language shared with AeroFusion AI (css/styles.css):
-   same tokens, light base + dark theme, sidebar groups, top bar, cards, KPI tiles, badges. */
+/* SAFAR – Mobility intelligence. Design tokens (light base + dark theme), sidebar groups, top bar, cards, KPI tiles, badges. */
 :root {
   --bg: #f2f5f9; --panel: #ffffff; --panel2: #f0f3f8; --line: #dfe5ee; --txt: #0e1b30; --mut: #5a6a82;
   --acc: #0b72c8; --acc-rgb: 11, 114, 200; --ok: #15803d; --warn: #b45309; --crit: #c81e1e; --info: #1d4ed8; --violet: #6d28d9; --hot: #c2410c;

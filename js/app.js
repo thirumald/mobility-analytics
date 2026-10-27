@@ -1,4 +1,4 @@
-/* App shell: sidebar navigation (AeroFusion style), hash router, theme, language, simulated user switch */
+/* App shell: sidebar navigation, hash router, theme, language, simulated user switch */
 (function () {
   const $ = (id) => document.getElementById(id);
   const VIEWS = ['agent', 'vision', 'usecases', 'data', 'gov', 'req'];
@@ -31,7 +31,7 @@
   }
   A.goto = (v) => { location.hash = '#/' + (v === 'map' ? 'overview' : v); };
 
-  function setTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem('af.theme', t); } catch (e) {} $('theme').textContent = t === 'dark' ? '☀' : '☾'; $('theme').title = t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'; A.emit('theme', t); if (DOCS[A.view]) DOCS[A.view](); }
+  function setTheme(t) { document.documentElement.dataset.theme = t; try { localStorage.setItem('safar.theme', t); } catch (e) {} $('theme').textContent = t === 'dark' ? '☀' : '☾'; $('theme').title = t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'; A.emit('theme', t); if (DOCS[A.view]) DOCS[A.view](); }
   function setLang(l) { A.lang = l; A.applyI18n(); buildNav(); renderUser(); A.emit('lang', l); route(); }
   function renderUser() {
     const u = A.user; $('uName').textContent = u.name; $('uRole').textContent = u.title; $('avatar').textContent = u.name.split(' ').map((x) => x[0]).slice(0, 2).join('');

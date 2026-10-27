@@ -1,8 +1,7 @@
 # SAFAR · Mobility intelligence for Abu Dhabi
 
 A static, build-free web app that fuses transit, fleet, event, safety, weather and population data into one operating
-picture for ground transport in **Abu Dhabi and the wider UAE**. It shares its design language with the parent
-**AeroFusion AI** app (same tokens, light/dark theme via the shared `af.theme` setting, grouped sidebar, KPI tiles).
+picture for ground transport in **Abu Dhabi and the wider UAE**, with a clean light/dark operations-console design (grouped sidebar, KPI tiles, map-first views).
 
 All network, demand, fleet, event, weather and incident data is **synthetic**. Hub coordinates are approximate and the
 routes (T1–T11, AL1, I1–I5) are fictional.
@@ -55,7 +54,7 @@ node tests/data.test.js                    # dataset and audit-hash checks
 ## Layout
 
 ```
-index.html        shell (sidebar, top bar, views)        css/app.css     tokens + components (AeroFusion style)
+index.html        shell (sidebar, top bar, views)        css/app.css     tokens + components
 js/core.js        state, i18n (EN/AR), data access, SQL   js/map.js      map, tool registry, transit diagnostics
 js/tools2.js      fleet, emissions, events, safety, what-if, heat, equity
 js/agent.js       Copilot (EN/AR rule-based parser)       js/sim.js      live vehicle/validation simulation
@@ -68,7 +67,3 @@ js/app.js         router, theme, language, user switch    data/ videos/ vendor/ 
 
 Leaflet 1.9.4 (BSD-2) and sql.js 1.10.3 (MIT) are vendored in `vendor/`. Emirate outlines from Natural Earth (public domain).
 Optional basemap tiles © OpenStreetMap contributors © CARTO.
-
-## Related
-
-The same module also lives in [`aerofusion-ai/mobility`](https://github.com/thirumald/aerofusion-ai/tree/main/mobility), next to the AeroFusion airport-security app whose design it follows.
