@@ -16,16 +16,31 @@
     const geoStyle = (f) => ({ color: f.properties.name === 'Abu Dhabi' ? A.C.cyan : (dark() ? '#334155' : '#a9b6c8'), weight: f.properties.name === 'Abu Dhabi' ? 1.4 : 1, fillColor: f.properties.name === 'Abu Dhabi' ? (dark() ? '#0c1a2e' : '#e6eef8') : (dark() ? '#0b1220' : '#eef2f7'), fillOpacity: 1, opacity: .9 });
     const geo = L.geoJSON(window.UAE_GEO, { interactive: false, style: geoStyle }).addTo(map);
     const geoKey = () => { try { return localStorage.getItem('safar.geoapifyKey') || (window.SAFAR_CONFIG && window.SAFAR_CONFIG.geoapifyKey) || ''; } catch (e) { return (window.SAFAR_CONFIG && window.SAFAR_CONFIG.geoapifyKey) || ''; } };
-    const tileUrl = () => geoKey()
-      ? `https://maps.geoapify.com/v1/tile/${dark() ? 'dark-matter' : 'osm-bright'}/{z}/{x}/{y}${L.Browser.retina ? '@2x' : ''}.png?apiKey=${encodeURIComponent(geoKey())}`
-      : `https://{s}.basemaps.cartocdn.com/${dark() ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`;
-    const attrib = () => (geoKey() ? 'Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> | © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' : '© OpenStreetMap contributors © CARTO');
-    tiles = L.tileLayer(tileUrl(), { subdomains: 'abcd', maxZoom: 19, attribution: attrib(), opacity: .95 });
+    // Basemap = Geoapify only (osm-bright light / dark-matter dark). No key or tile failure → bundled emirate outlines.
+    const tileUrl = () => `https://maps.geoapify.com/v1/tile/${dark() ? 'dark-matter' : 'osm-bright'}/{z}/{x}/{y}${L.Browser.retina ? '@2x' : ''}.png?apiKey=${encodeURIComponent(geoKey())}`;
+    const attrib = 'Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> | © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+    const note = (t) => { const n = $('mapNote'); n.textContent = t || ''; n.hidden = !t; };
+    tiles = L.tileLayer(tileUrl(), { maxZoom: 19, attribution: attrib, opacity: .95 });
     let errs = 0;
-    tiles.on('tileerror', () => { if (++errs === 4) { $('chkTiles').checked = false; map.removeLayer(tiles); } });
-    tiles.addTo(map);
+    tiles.on('tileerror', () => { if (++errs === 4) { $('chkTiles').checked = false; map.removeLayer(tiles); note('Geoapify tiles are not loading — check the API key and its allowed origins. Showing offline outline.'); } });
+    tiles.on('tileload', () => { errs = 0; note(''); });
+    if (geoKey()) tiles.addTo(map); else { $('chkTiles').checked = false; $('chkTiles').disabled = true; note('No Geoapify key configured — showing offline outline. Add GEOAPIFY_KEY (deploy secret) or use the account menu → Map key.'); }
     $('chkTiles').onchange = (e) => (e.target.checked ? (errs = 0, tiles.addTo(map)) : map.removeLayer(tiles));
-    A.on('theme', () => { geo.setStyle(geoStyle); tiles.setUrl(tileUrl()); render(); });
+    // Place search: Geoapify geocoding (UAE only), biased to Abu Dhabi.
+    let pin = null; const gq = $('geoq'), gr = $('geores');
+    const search = async () => {
+      const q = gq.value.trim(); if (q.length < 2) { gr.hidden = true; return; }
+      if (!geoKey()) { gr.innerHTML = '<div class="gr-i">Add a Geoapify key to enable place search.</div>'; gr.hidden = false; return; }
+      try {
+        const r = await fetch(`https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(q)}&filter=countrycode:ae&bias=proximity:54.3773,24.4539&limit=6&format=json&apiKey=${encodeURIComponent(geoKey())}`);
+        const j = await r.json(), items = j.results || [];
+        gr.innerHTML = items.length ? items.map((x, i) => `<button type="button" class="gr-i" data-i="${i}">${A.esc(x.formatted || x.name || '')}</button>`).join('') : '<div class="gr-i">No places found</div>'; gr.hidden = false;
+        gr.querySelectorAll('button').forEach((b) => (b.onclick = () => { const x = items[+b.dataset.i]; if (pin) map.removeLayer(pin); pin = L.marker([x.lat, x.lon]).addTo(map).bindPopup(`<b>${A.esc(x.name || x.address_line1 || '')}</b><br><small>${A.esc(x.formatted || '')}</small>`).openPopup(); map.setView([x.lat, x.lon], 15); gr.hidden = true; }));
+      } catch (e) { gr.innerHTML = '<div class="gr-i">Search unavailable</div>'; gr.hidden = false; }
+    };
+    gq.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); search(); } if (e.key === 'Escape') gr.hidden = true; });
+    document.addEventListener('click', (e) => { if (!e.target.closest('#geowrap')) gr.hidden = true; });
+    A.on('theme', () => { geo.setStyle(geoStyle); if (geoKey()) tiles.setUrl(tileUrl()); render(); });
     routeLayer = L.layerGroup().addTo(map); toolLayer = L.layerGroup().addTo(map); stopLayer = L.layerGroup().addTo(map); labelLayer = L.layerGroup().addTo(map);
     A.toolLayer = toolLayer;
     // labels

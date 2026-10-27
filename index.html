@@ -50,11 +50,13 @@
           <div id="toolPanel" class="panel"></div>
         </aside>
         <div class="maptools glass">
+          <span id="geowrap" class="geowrap"><input type="search" id="geoq" placeholder="Search place in UAE…" aria-label="Search place" autocomplete="off"><span id="geores" class="geores" hidden></span></span>
           <button id="btnLive" class="pri">▶ <span data-i18n="live_sim">Live simulation</span></button>
           <button id="btnFit" data-i18n="fit_uae">UAE</button><button id="btnFitAD" data-i18n="fit_ad">Abu Dhabi</button><button id="btnFitCity" data-i18n="fit_city">City</button>
           <label class="chk"><input type="checkbox" id="chkTiles" checked> <span data-i18n="online_tiles">Live basemap</span></label>
           <label class="chk"><input type="checkbox" id="chkStops" checked> <span data-i18n="show_stops">Stops</span></label>
         </div>
+        <div class="mapnote glass" id="mapNote" hidden></div>
         <div class="selchip glass" id="selChip" hidden></div>
         <div class="livebox glass" id="liveBox" hidden>
           <div class="livehead"><b data-i18n="live_clock">Sim clock</b> <span id="simClock">08:00:00</span>

@@ -94,7 +94,7 @@
       <section class="card"><h3>Design tokens (draft)</h3><div class="row2">${[['#070b14', 'Space'], ['#0e1627', 'Surface'], ['#22d3ee', 'Cyan'], ['#8b5cf6', 'Violet'], ['#34d399', 'OK'], ['#fbbf24', 'Warn'], ['#fb7185', 'Alert']].map(([c, n]) => `<div style="text-align:center"><div style="background:${c};width:72px;height:44px;border-radius:10px;border:1px solid var(--line)"></div><small>${n}<br><span class="mono">${c}</span></small></div>`).join('')}</div>
         <small>Dark mission-control style (inspired by aerospace operations consoles). Replace with the client's brand book when supplied.</small></section>
       <section class="card"><h3>Data sources & licences</h3><ul>
-        <li>UAE emirate outlines: Natural Earth (public domain). Leaflet 1.9.4 (BSD-2) and sql.js 1.10.3 (MIT) are vendored. Optional live basemap: © OpenStreetMap contributors © CARTO.</li>
+        <li>UAE emirate outlines: Natural Earth (public domain). Leaflet 1.9.4 (BSD-2) and sql.js 1.10.3 (MIT) are vendored. Basemap and place search: Geoapify, © OpenStreetMap contributors.</li>
         <li>Four camera scenes are <b>simulated</b> (<code>tools/make_scenes.py</code>). Three clips are generic real footage (OpenCV "vtest" pedestrian clip; a public highway-traffic clip) used for demonstration only — not from the UAE. Check licence terms before public release and replace with owned footage.</li>
         <li>All network, fleet, event, weather and incident data is synthetic; place coordinates are approximate.</li></ul></section>`;
   }

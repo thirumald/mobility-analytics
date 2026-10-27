@@ -89,6 +89,10 @@ input[type=range] { accent-color: var(--acc); width: 100%; }
 .maptools { position: absolute; top: 74px; inset-inline-start: 462px; z-index: 600; display: flex; gap: 6px; padding: 6px; flex-wrap: wrap; align-items: center; }
 .maptools .chk { border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--mut); }
 .maptools .chk input { width: auto; }
+.geowrap { position: relative; } #geoq { width: 210px; }
+.geores { position: absolute; top: calc(100% + 6px); left: 0; width: 340px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); padding: 4px; z-index: 700; display: block; }
+.geores[hidden] { display: none; } .gr-i { display: block; width: 100%; text-align: start; border: 0; background: transparent; padding: 7px 10px; border-radius: 6px; font-size: 12.5px; color: var(--txt); cursor: pointer; } button.gr-i:hover { background: rgba(var(--acc-rgb), .12); color: var(--acc); }
+.mapnote { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 600; padding: 7px 14px; font-size: 12px; color: var(--warn); max-width: min(560px, calc(100% - 40px)); text-align: center; }
 .selchip { position: absolute; top: 122px; inset-inline-start: 462px; z-index: 600; border-color: var(--acc); padding: 5px 7px 5px 12px; display: flex; gap: 8px; align-items: center; font-size: 12px; }
 .selchip.inline { position: static; box-shadow: none; display: inline-flex; margin: 6px 0; } .selchip button { border-radius: 99px; padding: 1px 9px; }
 .legend { position: absolute; inset-inline-end: 14px; bottom: 26px; z-index: 600; padding: 9px 12px; font-size: 11.5px; max-width: 240px; color: var(--mut); background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid var(--line); border-radius: 12px; }

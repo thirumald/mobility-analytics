@@ -13,7 +13,7 @@ python3 -m http.server 8000      # open http://localhost:8000
 ```
 
 Also works from `file://` (the SQL engine's WASM is embedded as base64). The included GitHub Pages workflow (`.github/workflows/static.yml`) publishes the repo root on every push to `main`.
-The live basemap (CARTO/OpenStreetMap) needs internet; offline, the app falls back to the bundled emirate outlines.
+The basemap uses **Geoapify** tiles (`osm-bright` light / `dark-matter` dark) and the map has a Geoapify **place search** (geocoding, UAE only). A key is required: the Pages workflow writes it into `js/config.js` from the `GEOAPIFY_KEY` repository secret, or save one in your browser (account menu → Map key). Without a key, or if tiles fail, the app shows the bundled emirate outlines.
 
 ## Pages (sidebar)
 
@@ -66,4 +66,4 @@ js/app.js         router, theme, language, user switch    data/ videos/ vendor/ 
 ## Third-party
 
 Leaflet 1.9.4 (BSD-2) and sql.js 1.10.3 (MIT) are vendored in `vendor/`. Emirate outlines from Natural Earth (public domain).
-Optional basemap tiles © OpenStreetMap contributors © CARTO.
+Basemap tiles and geocoding: Geoapify, © OpenStreetMap contributors.
