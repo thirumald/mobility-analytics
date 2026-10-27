@@ -36,8 +36,9 @@
   function renderUser() {
     const u = A.user; $('uName').textContent = u.name; $('uRole').textContent = u.title; $('avatar').textContent = u.name.split(' ').map((x) => x[0]).slice(0, 2).join('');
     $('user-menu').innerHTML = `<div class="ug">Account (simulated SSO)</div>` + A.users.map((x, i) => `<button data-u="${i}">${x.id === u.id ? '● ' : '○ '}${x.name} <small>${x.role}</small></button>`).join('') +
-      `<div class="ug">Preferences</div><button id="um-theme">${A.theme() === 'dark' ? '☀ Light theme' : '☾ Dark theme'}</button><button id="um-lang">${A.lang === 'en' ? 'ع  العربية' : 'EN  English'}</button>`;
+      `<div class="ug">Preferences</div><button id="um-key">🗺 Map key (Geoapify)…</button><button id="um-theme">${A.theme() === 'dark' ? '☀ Light theme' : '☾ Dark theme'}</button><button id="um-lang">${A.lang === 'en' ? 'ع  العربية' : 'EN  English'}</button>`;
     $('user-menu').querySelectorAll('[data-u]').forEach((b) => (b.onclick = () => { A.user = A.users[+b.dataset.u]; renderUser(); $('user-menu').hidden = true; A.emit('role', A.user); if (DOCS[A.view]) DOCS[A.view](); }));
+    $('um-key').onclick = () => { const k = prompt('Geoapify API key (stored in this browser only). Leave empty to clear.', (function () { try { return localStorage.getItem('safar.geoapifyKey') || ''; } catch (e) { return ''; } })()); if (k === null) return; try { k.trim() ? localStorage.setItem('safar.geoapifyKey', k.trim()) : localStorage.removeItem('safar.geoapifyKey'); } catch (e) {} location.reload(); };
     $('um-theme').onclick = () => setTheme(A.theme() === 'dark' ? 'light' : 'dark'); $('um-lang').onclick = () => setLang(A.lang === 'en' ? 'ar' : 'en');
   }
   function boot() {

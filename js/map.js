@@ -15,8 +15,12 @@
     const dark = () => A.theme() === 'dark';
     const geoStyle = (f) => ({ color: f.properties.name === 'Abu Dhabi' ? A.C.cyan : (dark() ? '#334155' : '#a9b6c8'), weight: f.properties.name === 'Abu Dhabi' ? 1.4 : 1, fillColor: f.properties.name === 'Abu Dhabi' ? (dark() ? '#0c1a2e' : '#e6eef8') : (dark() ? '#0b1220' : '#eef2f7'), fillOpacity: 1, opacity: .9 });
     const geo = L.geoJSON(window.UAE_GEO, { interactive: false, style: geoStyle }).addTo(map);
-    const tileUrl = () => `https://{s}.basemaps.cartocdn.com/${dark() ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`;
-    tiles = L.tileLayer(tileUrl(), { subdomains: 'abcd', maxZoom: 17, attribution: '© OpenStreetMap contributors © CARTO', opacity: .9 });
+    const geoKey = () => { try { return localStorage.getItem('safar.geoapifyKey') || (window.SAFAR_CONFIG && window.SAFAR_CONFIG.geoapifyKey) || ''; } catch (e) { return (window.SAFAR_CONFIG && window.SAFAR_CONFIG.geoapifyKey) || ''; } };
+    const tileUrl = () => geoKey()
+      ? `https://maps.geoapify.com/v1/tile/${dark() ? 'dark-matter' : 'osm-bright'}/{z}/{x}/{y}${L.Browser.retina ? '@2x' : ''}.png?apiKey=${encodeURIComponent(geoKey())}`
+      : `https://{s}.basemaps.cartocdn.com/${dark() ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`;
+    const attrib = () => (geoKey() ? 'Powered by <a href="https://www.geoapify.com/" target="_blank" rel="noopener">Geoapify</a> | © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' : '© OpenStreetMap contributors © CARTO');
+    tiles = L.tileLayer(tileUrl(), { subdomains: 'abcd', maxZoom: 19, attribution: attrib(), opacity: .95 });
     let errs = 0;
     tiles.on('tileerror', () => { if (++errs === 4) { $('chkTiles').checked = false; map.removeLayer(tiles); } });
     tiles.addTo(map);

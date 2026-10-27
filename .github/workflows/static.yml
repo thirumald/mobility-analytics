@@ -31,6 +31,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Write map key from repository secret (optional)
+        env:
+          GEOAPIFY_KEY: ${{ secrets.GEOAPIFY_KEY }}
+        run: |
+          if [ -n "$GEOAPIFY_KEY" ]; then
+            printf 'window.SAFAR_CONFIG = { geoapifyKey: "%s" };\n' "$GEOAPIFY_KEY" > js/config.js
+          fi
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
